@@ -134,12 +134,37 @@ function BracketMiniGame({ game }: { game: BracketGame }) {
   const t2 = game.team2;
   const isLive = game.state === "in";
   const isFinal = game.state === "post";
+  const isUpcoming = game.state === "pre";
   const isTBD = t1.abbreviation === "TBD" && t2.abbreviation === "TBD";
+
+  // Format time for upcoming games
+  const gameTime = game.date
+    ? new Date(game.date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })
+    : "";
 
   return (
     <div className={`text-[11px] leading-tight rounded-lg border min-w-[150px] ${
       isLive ? "border-red-500/40 bg-red-500/5" : "border-white/8 bg-white/[0.03]"
     }`}>
+      {/* Status bar: time for upcoming, LIVE for in-progress, FINAL for done */}
+      {!isTBD && (
+        <div className={`px-2 py-0.5 text-[9px] font-semibold text-center border-b ${
+          isLive
+            ? "bg-red-500/10 text-red-400 border-red-500/20"
+            : isFinal
+              ? "bg-white/[0.02] text-gray-500 border-white/5"
+              : "bg-[#2d68c4]/10 text-[#4a90e2] border-white/5"
+        }`}>
+          {isLive && (
+            <span className="flex items-center justify-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-live" />
+              {game.statusDetail}
+            </span>
+          )}
+          {isFinal && "FINAL"}
+          {isUpcoming && gameTime}
+        </div>
+      )}
       {/* Team 1 */}
       <div className={`flex items-center gap-1.5 px-2 py-1.5 ${isFinal && !t1.winner ? "opacity-35" : ""}`}>
         {t1.logo ? (
