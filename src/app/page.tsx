@@ -233,12 +233,93 @@ function makeTBD(id: string): BracketGame {
   };
 }
 
+// ── Bracket Sorting ──────────────────────────────────────────────────
+// Standard NCAA bracket: 1v16, 8v9, 5v12, 4v13, 6v11, 3v14, 7v10, 2v15
+const R1_TOP_SEED_ORDER = [1, 8, 5, 4, 6, 3, 7, 2];
+
+// Each pair of R1 games feeds one R2 game. Group by which seeds appear.
+const BRACKET_QUADRANTS = [
+  new Set([1, 16, 8, 9]),   // R1 pair 0+1 → R2 game 0
+  new Set([5, 12, 4, 13]),  // R1 pair 2+3 → R2 game 1
+  new Set([6, 11, 3, 14]),  // R1 pair 4+5 → R2 game 2
+  new Set([7, 10, 2, 15]),  // R1 pair 6+7 → R2 game 3
+];
+
+const BRACKET_HALVES = [
+  new Set([1, 16, 8, 9, 5, 12, 4, 13]),  // Top half → S16 game 0
+  new Set([6, 11, 3, 14, 7, 10, 2, 15]), // Bottom half → S16 game 1
+];
+
+function getTopSeed(game: BracketGame): number {
+  const s1 = game.team1.seed;
+  const s2 = game.team2.seed;
+  if (s1 > 0 && s2 > 0) return Math.min(s1, s2);
+  if (s1 > 0) return s1;
+  if (s2 > 0) return s2;
+  return 99;
+}
+
+function getGameSeeds(game: BracketGame): number[] {
+  return [game.team1.seed, game.team2.seed].filter((s) => s > 0 && s <= 16);
+}
+
+function sortR1(games: BracketGame[]): BracketGame[] {
+  return [...games].sort((a, b) => {
+    const aIdx = R1_TOP_SEED_ORDER.indexOf(getTopSeed(a));
+    const bIdx = R1_TOP_SEED_ORDER.indexOf(getTopSeed(b));
+    return (aIdx >= 0 ? aIdx : 99) - (bIdx >= 0 ? bIdx : 99);
+  });
+}
+
+function sortR2(games: BracketGame[], r1Sorted: BracketGame[]): BracketGame[] {
+  // For each R2 game, figure out which quadrant it belongs to by checking team seeds
+  return [...games].sort((a, b) => {
+    const aSeeds = getGameSeeds(a);
+    const bSeeds = getGameSeeds(b);
+    let aQ = 99, bQ = 99;
+    for (let q = 0; q < BRACKET_QUADRANTS.length; q++) {
+      if (aSeeds.some((s) => BRACKET_QUADRANTS[q].has(s))) aQ = q;
+      if (bSeeds.some((s) => BRACKET_QUADRANTS[q].has(s))) bQ = q;
+    }
+    // If seeds don't match (TBD teams), try matching by position from R1 winners
+    if (aQ === 99 || bQ === 99) {
+      // Fall back to matching R2 team names against R1 winners
+      for (let q = 0; q < 4; q++) {
+        const r1Pair = [r1Sorted[q * 2], r1Sorted[q * 2 + 1]];
+        const r1Winners = r1Pair.flatMap((g) => [g.team1, g.team2].filter((t) => t.winner).map((t) => t.abbreviation));
+        if (aQ === 99 && [a.team1.abbreviation, a.team2.abbreviation].some((n) => r1Winners.includes(n))) aQ = q;
+        if (bQ === 99 && [b.team1.abbreviation, b.team2.abbreviation].some((n) => r1Winners.includes(n))) bQ = q;
+      }
+    }
+    return aQ - bQ;
+  });
+}
+
+function sortR3(games: BracketGame[]): BracketGame[] {
+  return [...games].sort((a, b) => {
+    const aSeeds = getGameSeeds(a);
+    const bSeeds = getGameSeeds(b);
+    let aH = 99, bH = 99;
+    for (let h = 0; h < BRACKET_HALVES.length; h++) {
+      if (aSeeds.some((s) => BRACKET_HALVES[h].has(s))) aH = h;
+      if (bSeeds.some((s) => BRACKET_HALVES[h].has(s))) bH = h;
+    }
+    return aH - bH;
+  });
+}
+
 // ── Bracket Region (with connectors) ─────────────────────────────────
 function BracketRegion({ region, games }: { region: string; games: BracketGame[] }) {
-  const r1 = games.filter((g) => g.round === 1);
-  const r2 = games.filter((g) => g.round === 2);
-  const r3 = games.filter((g) => g.round === 3);
-  const r4 = games.filter((g) => g.round === 4);
+  const r1Raw = games.filter((g) => g.round === 1);
+  const r2Raw = games.filter((g) => g.round === 2);
+  const r3Raw = games.filter((g) => g.round === 3);
+  const r4Raw = games.filter((g) => g.round === 4);
+
+  // Sort each round into proper bracket order
+  const r1 = sortR1(r1Raw);
+  const r2 = sortR2(r2Raw, r1);
+  const r3 = sortR3(r3Raw);
+  const r4 = [...r4Raw];
 
   // Pad rounds with placeholders if needed
   while (r1.length < 8) r1.push(makeTBD(`${region}-r1-ph-${r1.length}`));
@@ -551,7 +632,18 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+      {/* Large basketball decoration — upper right */}
+      <div className="fixed top-8 right-8 z-0 opacity-[0.06] pointer-events-none hidden lg:block">
+        <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="95" stroke="#4a90e2" strokeWidth="4" />
+          <path d="M100 5 C100 195" stroke="#4a90e2" strokeWidth="3" />
+          <path d="M5 100 C195 100" stroke="#4a90e2" strokeWidth="3" />
+          <path d="M100 5 C55 50 55 150 100 195" stroke="#4a90e2" strokeWidth="3" />
+          <path d="M100 5 C145 50 145 150 100 195" stroke="#4a90e2" strokeWidth="3" />
+        </svg>
+      </div>
+
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_0_30px_rgba(45,104,196,0.3)]">
