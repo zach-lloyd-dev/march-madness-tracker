@@ -7,11 +7,21 @@ import type { BracketGame } from "./api/bracket/route";
 const REFRESH_INTERVAL = 30_000;
 
 function formatGameTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString("en-US", {
+  const d = new Date(dateStr);
+  const local = d.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     timeZoneName: "short",
   });
+  const et = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  });
+  // If user is already in ET, don't show duplicate
+  const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (localTZ === "America/New_York") return local;
+  return `${local} / ${et} ET`;
 }
 
 function formatGameDate(dateStr: string): string {
