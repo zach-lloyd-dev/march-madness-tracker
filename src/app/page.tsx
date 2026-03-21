@@ -179,55 +179,138 @@ function BracketMiniGame({ game }: { game: BracketGame }) {
   );
 }
 
-// ── Bracket Column ───────────────────────────────────────────────────
-function BracketColumn({ title, games }: { title: string; games: BracketGame[] }) {
+// ── Bracket Matchup Pair (connects two games to one next-round game) ──
+function BracketMatchupPair({
+  game1,
+  game2,
+  nextGame,
+  isLast,
+}: {
+  game1: BracketGame;
+  game2: BracketGame;
+  nextGame: BracketGame | null;
+  isLast: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-2 min-w-[160px]">
-      <h4 className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-wider text-center mb-1 whitespace-nowrap">
-        {title}
-      </h4>
-      <div className="flex flex-col justify-around flex-1 gap-1.5">
-        {games.map((g) => (
-          <BracketMiniGame key={g.id} game={g} />
-        ))}
+    <div className="flex items-stretch">
+      {/* Two feeder games */}
+      <div className="flex flex-col justify-center gap-1">
+        <BracketMiniGame game={game1} />
+        <BracketMiniGame game={game2} />
       </div>
+      {/* Connector lines */}
+      <div className="flex items-stretch w-6 shrink-0">
+        <div className="flex flex-col w-3">
+          <div className="flex-1 border-b border-r border-white/15 rounded-br-none" />
+          <div className="flex-1 border-t border-r border-white/15 rounded-tr-none" />
+        </div>
+        <div className="flex items-center w-3">
+          <div className="w-full border-t border-white/15" />
+        </div>
+      </div>
+      {/* Next round game */}
+      {nextGame && (
+        <div className="flex items-center">
+          <BracketMiniGame game={nextGame} />
+        </div>
+      )}
     </div>
   );
 }
 
-// ── Bracket Region ───────────────────────────────────────────────────
-function BracketRegion({ region, games }: { region: string; games: BracketGame[] }) {
-  const rounds = [1, 2, 3, 4];
-  const roundNames = ["1st Round", "2nd Round", "Sweet 16", "Elite 8"];
+// ── TBD Placeholder ──────────────────────────────────────────────────
+function makeTBD(id: string): BracketGame {
+  return {
+    id,
+    round: 0,
+    roundName: "",
+    region: "",
+    state: "pre",
+    statusDetail: "TBD",
+    date: "",
+    team1: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
+    team2: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
+  };
+}
 
-  const makePlaceholder = (r: number, i: number, count: number): BracketGame[] =>
-    Array.from({ length: count }, (_, j) => ({
-      id: `${region}-${r}-placeholder-${j}`,
-      round: r,
-      roundName: roundNames[i],
-      region,
-      state: "pre" as const,
-      statusDetail: "TBD",
-      date: "",
-      team1: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
-      team2: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
-    }));
+// ── Bracket Region (with connectors) ─────────────────────────────────
+function BracketRegion({ region, games }: { region: string; games: BracketGame[] }) {
+  const r1 = games.filter((g) => g.round === 1);
+  const r2 = games.filter((g) => g.round === 2);
+  const r3 = games.filter((g) => g.round === 3);
+  const r4 = games.filter((g) => g.round === 4);
+
+  // Pad rounds with placeholders if needed
+  while (r1.length < 8) r1.push(makeTBD(`${region}-r1-ph-${r1.length}`));
+  while (r2.length < 4) r2.push(makeTBD(`${region}-r2-ph-${r2.length}`));
+  while (r3.length < 2) r3.push(makeTBD(`${region}-r3-ph-${r3.length}`));
+  while (r4.length < 1) r4.push(makeTBD(`${region}-r4-ph-${r4.length}`));
 
   return (
     <div className="mb-4">
       <h3 className="text-sm font-bold text-white mb-3 text-center px-3 py-2 rounded-xl bg-[#2d68c4]/15 border border-[#2d68c4]/25">
         {region} Region
       </h3>
-      <div className="flex gap-3 items-stretch">
-        {rounds.map((r, i) => {
-          let roundGames = games.filter((g) => g.round === r);
-          // If no games exist for this round, show placeholders
-          if (roundGames.length === 0) {
-            const expectedCounts: Record<number, number> = { 1: 8, 2: 4, 3: 2, 4: 1 };
-            roundGames = makePlaceholder(r, i, expectedCounts[r] || 1);
-          }
-          return <BracketColumn key={r} title={roundNames[i]} games={roundGames} />;
-        })}
+      {/* Round headers */}
+      <div className="flex gap-0 mb-2 text-[10px] font-bold text-[#4a90e2] uppercase tracking-wider">
+        <span className="min-w-[150px] text-center">1st Round</span>
+        <span className="w-6 shrink-0" />
+        <span className="min-w-[150px] text-center">2nd Round</span>
+        <span className="w-6 shrink-0" />
+        <span className="min-w-[150px] text-center">Sweet 16</span>
+        <span className="w-6 shrink-0" />
+        <span className="min-w-[150px] text-center">Elite 8</span>
+      </div>
+      {/* Bracket tree: R1 pairs → R2, R2 pairs → R3, R3 pair → R4 */}
+      <div className="flex items-stretch">
+        {/* R1→R2 column */}
+        <div className="flex flex-col justify-around gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <BracketMatchupPair
+              key={`r1-${i}`}
+              game1={r1[i * 2]}
+              game2={r1[i * 2 + 1]}
+              nextGame={r2[i]}
+              isLast={i === 3}
+            />
+          ))}
+        </div>
+        {/* R2→R3 connectors + R3 games */}
+        <div className="flex items-stretch">
+          <div className="flex flex-col justify-around">
+            {[0, 1].map((i) => (
+              <div key={`r2-${i}`} className="flex items-stretch">
+                <div className="flex items-stretch w-6 shrink-0">
+                  <div className="flex flex-col w-3">
+                    <div className="flex-1 border-b border-r border-white/15" />
+                    <div className="flex-1 border-t border-r border-white/15" />
+                  </div>
+                  <div className="flex items-center w-3">
+                    <div className="w-full border-t border-white/15" />
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <BracketMiniGame game={r3[i]} />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* R3→R4 connector + R4 game */}
+          <div className="flex items-stretch">
+            <div className="flex items-stretch w-6 shrink-0">
+              <div className="flex flex-col w-3">
+                <div className="flex-1 border-b border-r border-white/15" />
+                <div className="flex-1 border-t border-r border-white/15" />
+              </div>
+              <div className="flex items-center w-3">
+                <div className="w-full border-t border-white/15" />
+              </div>
+            </div>
+            <div className="flex items-center">
+              <BracketMiniGame game={r4[0]} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -263,27 +346,28 @@ function BracketModal({ games, onClose }: { games: BracketGame[]; onClose: () =>
                 <BracketRegion key={region} region={region} games={games.filter((g) => g.region === region)} />
               ))}
             </div>
-            <div className="mt-4 flex flex-col items-center gap-4 border-t border-white/5 pt-4">
-              <div className="flex gap-8 items-start">
-                <BracketColumn
-                  title="Final Four"
-                  games={finalFourGames.length > 0 ? finalFourGames : [
-                    { id: "ff-1", round: 5, roundName: "Final Four", region: "Final Four", state: "pre", statusDetail: "TBD", date: "",
-                      team1: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
-                      team2: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false } },
-                    { id: "ff-2", round: 5, roundName: "Final Four", region: "Final Four", state: "pre", statusDetail: "TBD", date: "",
-                      team1: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
-                      team2: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false } },
-                  ]}
-                />
-                <BracketColumn
-                  title="Championship"
-                  games={championshipGames.length > 0 ? championshipGames : [
-                    { id: "champ-1", round: 6, roundName: "Championship", region: "Championship", state: "pre", statusDetail: "TBD", date: "",
-                      team1: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false },
-                      team2: { name: "TBD", shortName: "TBD", abbreviation: "TBD", logo: "", seed: 0, score: 0, winner: false } },
-                  ]}
-                />
+            {/* Final Four + Championship with connectors */}
+            <div className="mt-4 flex items-center justify-center gap-0 border-t border-white/5 pt-4">
+              <div className="flex flex-col items-center">
+                <h4 className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-wider mb-2">Final Four</h4>
+                <div className="flex flex-col gap-2">
+                  {(finalFourGames.length > 0 ? finalFourGames : [makeTBD("ff-1"), makeTBD("ff-2")]).map((g) => (
+                    <BracketMiniGame key={g.id} game={g} />
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-stretch w-6 shrink-0">
+                <div className="flex flex-col w-3">
+                  <div className="flex-1 border-b border-r border-white/15" />
+                  <div className="flex-1 border-t border-r border-white/15" />
+                </div>
+                <div className="flex items-center w-3">
+                  <div className="w-full border-t border-white/15" />
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <h4 className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-wider mb-2">Championship</h4>
+                <BracketMiniGame game={championshipGames[0] || makeTBD("champ-1")} />
               </div>
             </div>
           </div>
