@@ -32,20 +32,20 @@ const ROUND_MAP: Record<string, number> = {
 };
 
 function parseRound(headline: string): { roundNum: number; roundName: string; region: string } {
+  // Parse region from "... - East Region - ..." pattern
   let region = "";
   const regionMatch = headline.match(/(East|West|South|Midwest)\s*Region/i);
   if (regionMatch) region = regionMatch[1];
-  if (headline.includes("Final Four") || headline.includes("National Semifinal")) region = "Final Four";
-  if (headline.includes("Championship") || headline.includes("National Final")) region = "Championship";
 
+  // Parse round — check specific rounds before generic "Championship" (which appears in ALL headlines)
   let roundName = "";
   let roundNum = 0;
   if (headline.includes("1st Round")) { roundName = "1st Round"; roundNum = 1; }
   else if (headline.includes("2nd Round")) { roundName = "2nd Round"; roundNum = 2; }
   else if (headline.includes("Sweet 16") || headline.includes("Regional Semifinal")) { roundName = "Sweet 16"; roundNum = 3; }
   else if (headline.includes("Elite Eight") || headline.includes("Regional Final")) { roundName = "Elite Eight"; roundNum = 4; }
-  else if (headline.includes("Final Four") || headline.includes("National Semifinal")) { roundName = "Final Four"; roundNum = 5; }
-  else if (headline.includes("Championship") || headline.includes("National Final")) { roundName = "Championship"; roundNum = 6; }
+  else if (headline.includes("Final Four") || headline.includes("National Semifinal")) { roundName = "Final Four"; roundNum = 5; region = "Final Four"; }
+  else if (headline.includes("National Final")) { roundName = "Championship"; roundNum = 6; region = "Championship"; }
 
   return { roundNum, roundName, region };
 }
