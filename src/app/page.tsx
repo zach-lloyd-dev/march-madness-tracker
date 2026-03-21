@@ -679,25 +679,6 @@ export default function Home() {
       </div>
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6 sm:py-8 relative z-10">
-        {/* Mobile: Follow + Purdue inline */}
-        <div className="flex sm:hidden items-center justify-between mb-4">
-          <a
-            href="https://x.com/zachlloydai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="glass-pill !rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-white"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-            @zachlloydai
-          </a>
-          <div className="glass-pill !rounded-lg px-3 py-1.5 flex items-center gap-2">
-            <img src="https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png" alt="Purdue" className="w-5 h-5 object-contain" />
-            <span className="text-[9px] font-semibold text-gray-400 uppercase">Rooting For</span>
-          </div>
-        </div>
-
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-2 sm:mb-3 tracking-tight drop-shadow-[0_0_30px_rgba(45,104,196,0.3)]">
@@ -709,6 +690,20 @@ export default function Home() {
             <br />
             <span className="text-gray-400">No digging required.</span>
           </h2>
+
+          {/* Follow on X — between subtitle and stats */}
+          <a
+            href="https://x.com/zachlloydai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full glass-pill text-sm font-semibold text-white hover:text-[#4a90e2] transition-colors"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            Follow @zachlloydai
+          </a>
+
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-5">
             {liveCount > 0 && (
               <span className="glass-pill !bg-red-500/10 !border-red-500/25 inline-flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold text-red-400">
@@ -815,6 +810,12 @@ export default function Home() {
             </a>
           </div>
           <p className="text-sm text-gray-500 mt-4">Built by Zach Lloyd</p>
+
+          {/* Purdue — mobile only, at bottom */}
+          <div className="sm:hidden flex flex-col items-center gap-2 mt-6 pt-4 border-t border-white/5">
+            <img src="https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png" alt="Purdue Boilermakers" className="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(206,184,136,0.3)]" />
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Who I&apos;m Rooting For</span>
+          </div>
         </footer>
       </main>
     </div>
