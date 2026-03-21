@@ -241,11 +241,11 @@ function BracketModal({ games, onClose }: { games: BracketGame[]; onClose: () =>
 
   return (
     <div
-      className="fixed inset-0 z-50 bracket-backdrop bg-black/70 flex items-start justify-center p-4 pt-6"
+      className="fixed inset-0 z-50 bracket-backdrop bg-black/70 overflow-y-auto"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="glass-card !rounded-2xl w-full max-w-[96vw] max-h-[92vh] flex flex-col !bg-[rgba(8,16,35,0.92)]">
-        <div className="relative z-10 flex flex-col h-full">
+      <div className="glass-card !rounded-2xl w-[96vw] mx-auto my-4 !bg-[rgba(8,16,35,0.95)]" onClick={(e) => e.stopPropagation()}>
+        <div className="relative z-10">
           <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
             <h2 className="text-lg font-bold text-white">2026 NCAA Tournament Bracket</h2>
             <button
@@ -257,7 +257,7 @@ function BracketModal({ games, onClose }: { games: BracketGame[]; onClose: () =>
               </svg>
             </button>
           </div>
-          <div className="bracket-scroll p-4 flex-1 min-h-0">
+          <div className="p-4 overflow-x-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-[700px]">
               {regions.map((region) => (
                 <BracketRegion key={region} region={region} games={games.filter((g) => g.region === region)} />
