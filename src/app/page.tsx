@@ -117,17 +117,17 @@ function GameCard({ game }: { game: Game }) {
           <div className="border-t border-white/5" />
           <TeamRow team={game.homeTeam} state={game.state} isWinner={game.homeTeam.winner} />
         </div>
-        <div className="border-t border-white/5 pt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="text-sm font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">{formatGameTime(game.date)}</span>
+        <div className="border-t border-white/5 pt-3 flex flex-wrap items-center gap-2 sm:gap-x-4 sm:gap-y-2">
+          <span className="text-xs sm:text-sm font-bold text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]">{formatGameTime(game.date)}</span>
           {game.tvChannels.length > 0 && (
-            <span className="channel-tag flex items-center gap-1.5 text-sm font-bold text-[#4a90e2] px-3 py-1.5 rounded-xl">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            <span className="channel-tag flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-bold text-[#4a90e2] px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               {game.tvChannels.join(", ")}
             </span>
           )}
           {game.streamingPlatforms.length > 0 && (
-            <span className="stream-tag flex items-center gap-1.5 text-sm font-bold text-orange-400 px-3 py-1.5 rounded-xl">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            <span className="stream-tag flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-bold text-orange-400 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
               {game.streamingPlatforms.join(", ")}
             </span>
           )}
@@ -440,10 +440,10 @@ function BracketModal({ games, onClose }: { games: BracketGame[]; onClose: () =>
 
   return (
     <div
-      className="fixed inset-0 z-50 bracket-backdrop bg-black/70 overflow-y-auto"
+      className="fixed inset-0 z-50 bracket-backdrop bg-black/70 overflow-y-auto overflow-x-auto"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="glass-card !rounded-2xl w-[96vw] mx-auto my-4 !bg-[rgba(8,16,35,0.95)]" onClick={(e) => e.stopPropagation()}>
+      <div className="glass-card !rounded-2xl w-[96vw] sm:w-[96vw] mx-auto my-4 !bg-[rgba(8,16,35,0.95)]" onClick={(e) => e.stopPropagation()}>
         <div className="relative z-10">
           <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
             <h2 className="text-lg font-bold text-white">2026 NCAA Tournament Bracket</h2>
@@ -457,7 +457,7 @@ function BracketModal({ games, onClose }: { games: BracketGame[]; onClose: () =>
             </button>
           </div>
           <div className="p-4 overflow-x-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-[700px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-[600px]">
               {regions.map((region) => (
                 <BracketRegion key={region} region={region} games={games.filter((g) => g.region === region)} />
               ))}
@@ -644,8 +644,8 @@ export default function Home() {
     <div className="ambient-bg min-h-screen">
       {showBracket && <BracketModal games={bracketGames} onClose={() => setShowBracket(false)} />}
 
-      {/* Follow on X + Purdue — fixed top-left */}
-      <div className="fixed top-4 left-4 z-40 flex flex-col items-center gap-2">
+      {/* Follow on X + Purdue — fixed top-left on desktop, inline on mobile */}
+      <div className="hidden sm:flex fixed top-4 left-4 z-40 flex-col items-center gap-2">
         <a
           href="https://x.com/zachlloydai"
           target="_blank"
@@ -678,19 +678,38 @@ export default function Home() {
         </svg>
       </div>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-8 relative z-10">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6 sm:py-8 relative z-10">
+        {/* Mobile: Follow + Purdue inline */}
+        <div className="flex sm:hidden items-center justify-between mb-4">
+          <a
+            href="https://x.com/zachlloydai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="glass-pill !rounded-lg px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-white"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            @zachlloydai
+          </a>
+          <div className="glass-pill !rounded-lg px-3 py-1.5 flex items-center gap-2">
+            <img src="https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png" alt="Purdue" className="w-5 h-5 object-contain" />
+            <span className="text-[9px] font-semibold text-gray-400 uppercase">Rooting For</span>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-[0_0_30px_rgba(45,104,196,0.3)]">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-2 sm:mb-3 tracking-tight drop-shadow-[0_0_30px_rgba(45,104,196,0.3)]">
             March Madness{" "}
             <span className="text-[#4a90e2] drop-shadow-[0_0_20px_rgba(74,144,226,0.4)]">2026</span>
           </h1>
-          <h2 className="text-lg sm:text-xl text-gray-300 font-medium max-w-lg mx-auto leading-relaxed">
+          <h2 className="text-sm sm:text-xl text-gray-300 font-medium max-w-lg mx-auto leading-relaxed">
             Every game. Every channel. Every stream.
             <br />
             <span className="text-gray-400">No digging required.</span>
           </h2>
-          <div className="flex items-center justify-center gap-4 sm:gap-6 mt-5">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-5">
             {liveCount > 0 && (
               <span className="glass-pill !bg-red-500/10 !border-red-500/25 inline-flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold text-red-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse-live shadow-[0_0_10px_rgba(239,68,68,0.6)]" />
