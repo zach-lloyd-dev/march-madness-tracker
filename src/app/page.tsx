@@ -839,7 +839,7 @@ export default function Home() {
             href="https://x.com/zachlloydai"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-full glass-pill text-sm font-semibold text-white hover:text-[#4a90e2] transition-colors"
+            className="inline-flex items-center gap-2 mt-3 px-4 py-2.5 rounded-full glass-pill text-sm font-semibold text-white hover:text-[#4a90e2] transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -941,11 +941,11 @@ export default function Home() {
           )}
           <p className="text-xs text-gray-500">Data from ESPN. All times in your local timezone + ET.</p>
           <div className="flex items-center justify-center gap-6 mt-6">
-            <a href="https://skool.com/zero-to-automated" target="_blank" rel="noopener noreferrer" className="text-base font-semibold text-gray-300 hover:text-[#4a90e2] transition-colors">
+            <a href="https://skool.com/zero-to-automated" target="_blank" rel="noopener noreferrer" className="text-base font-semibold text-gray-300 hover:text-[#4a90e2] transition-colors py-2.5">
               Zero to Automated Community
             </a>
             <span className="text-gray-600 text-lg">|</span>
-            <a href="https://youtube.com/@blacksheepsystems" target="_blank" rel="noopener noreferrer" className="text-base font-semibold text-gray-300 hover:text-[#4a90e2] transition-colors">
+            <a href="https://youtube.com/@blacksheepsystems" target="_blank" rel="noopener noreferrer" className="text-base font-semibold text-gray-300 hover:text-[#4a90e2] transition-colors py-2.5">
               YouTube
             </a>
           </div>
