@@ -582,6 +582,141 @@ function InlineBracketPreview({ games, onClick }: { games: BracketGame[]; onClic
   );
 }
 
+// ── Next Round Countdown ─────────────────────────────────────────────
+function NextRoundCountdown({ bracketGames }: { bracketGames: BracketGame[] }) {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Find the next upcoming round
+  const upcomingGames = bracketGames
+    .filter((g) => g.state === "pre" && g.date)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  if (upcomingGames.length === 0) return null;
+
+  const nextRoundName = upcomingGames[0].roundName;
+  const nextRoundGames = upcomingGames.filter((g) => g.roundName === nextRoundName);
+  const firstGameDate = new Date(nextRoundGames[0].date);
+  const diff = firstGameDate.getTime() - now.getTime();
+
+  // Only show if next game is more than 6 hours away
+  if (diff < 6 * 60 * 60 * 1000) return null;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  // Group games by date for display
+  const gamesByDate: Record<string, BracketGame[]> = {};
+  for (const g of nextRoundGames) {
+    const dateKey = new Date(g.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    if (!gamesByDate[dateKey]) gamesByDate[dateKey] = [];
+    gamesByDate[dateKey].push(g);
+  }
+
+  // Check if matchups are known (not all TBD)
+  const hasMatchups = nextRoundGames.some(
+    (g) => g.team1.abbreviation !== "TBD" || g.team2.abbreviation !== "TBD"
+  );
+
+  return (
+    <div className="glass-card p-5 sm:p-6 mb-8">
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="text-center mb-5">
+          <p className="text-xs font-bold text-[#4a90e2] uppercase tracking-widest mb-2">Up Next</p>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            {nextRoundName}
+          </h3>
+          <p className="text-sm text-gray-400 mt-1">
+            {Object.keys(gamesByDate).join(" & ")}
+          </p>
+        </div>
+
+        {/* Countdown */}
+        <div className="flex items-center justify-center gap-3 sm:gap-5 mb-6">
+          {days > 0 && (
+            <div className="flex flex-col items-center">
+              <span className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums drop-shadow-[0_0_15px_rgba(74,144,226,0.3)]">
+                {days}
+              </span>
+              <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">
+                {days === 1 ? "Day" : "Days"}
+              </span>
+            </div>
+          )}
+          {days > 0 && <span className="text-2xl text-gray-600 font-light">:</span>}
+          <div className="flex flex-col items-center">
+            <span className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums drop-shadow-[0_0_15px_rgba(74,144,226,0.3)]">
+              {hours}
+            </span>
+            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">
+              {hours === 1 ? "Hour" : "Hours"}
+            </span>
+          </div>
+          <span className="text-2xl text-gray-600 font-light">:</span>
+          <div className="flex flex-col items-center">
+            <span className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums drop-shadow-[0_0_15px_rgba(74,144,226,0.3)]">
+              {String(minutes).padStart(2, "0")}
+            </span>
+            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">Min</span>
+          </div>
+        </div>
+
+        {/* Matchups */}
+        {hasMatchups && (
+          <div className="space-y-4">
+            {Object.entries(gamesByDate).map(([dateLabel, dateGames]) => (
+              <div key={dateLabel}>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">{dateLabel}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {dateGames.map((g) => {
+                    const t1 = g.team1;
+                    const t2 = g.team2;
+                    const isTBD = t1.abbreviation === "TBD" && t2.abbreviation === "TBD";
+                    if (isTBD) return null;
+                    const gameTime = new Date(g.date).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      timeZoneName: "short",
+                    });
+                    return (
+                      <div key={g.id} className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                        {/* Team 1 */}
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          {t1.logo && <img src={t1.logo} alt="" className="w-5 h-5 object-contain shrink-0" />}
+                          <span className="text-xs text-[#4a90e2] font-semibold shrink-0">{t1.seed > 0 ? t1.seed : ""}</span>
+                          <span className="text-sm font-semibold text-gray-200 truncate">{t1.abbreviation === "TBD" ? "TBD" : t1.shortName || t1.abbreviation}</span>
+                        </div>
+                        <span className="text-xs font-bold text-gray-600 shrink-0">vs</span>
+                        {/* Team 2 */}
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                          <span className="text-sm font-semibold text-gray-200 truncate text-right">{t2.abbreviation === "TBD" ? "TBD" : t2.shortName || t2.abbreviation}</span>
+                          <span className="text-xs text-[#4a90e2] font-semibold shrink-0">{t2.seed > 0 ? t2.seed : ""}</span>
+                          {t2.logo && <img src={t2.logo} alt="" className="w-5 h-5 object-contain shrink-0" />}
+                        </div>
+                        {/* Region + Time */}
+                        <div className="hidden sm:flex flex-col items-end shrink-0 ml-2">
+                          <span className="text-[10px] text-[#4a90e2] font-semibold">{g.region}</span>
+                          <span className="text-[10px] text-gray-500">{gameTime}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Group Games by Date ──────────────────────────────────────────────
 type GroupedGames = { label: string; games: Game[] }[];
 
@@ -727,18 +862,15 @@ export default function Home() {
           </div>
         )}
 
+        {/* Next Round Countdown — shows when gap between rounds */}
+        {!loading && bracketGames.length > 0 && (
+          <NextRoundCountdown bracketGames={bracketGames} />
+        )}
+
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
             <div className="w-10 h-10 border-2 border-[#4a90e2] border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(74,144,226,0.3)]" />
-          </div>
-        )}
-
-        {/* No Games */}
-        {!loading && games.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
-            <p className="text-lg">No tournament games scheduled</p>
-            <p className="text-sm mt-2">Check back closer to game day</p>
           </div>
         )}
 
