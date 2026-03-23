@@ -587,7 +587,7 @@ function NextRoundCountdown({ bracketGames }: { bracketGames: BracketGame[] }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60_000);
+    const timer = setInterval(() => setNow(new Date()), 1_000);
     return () => clearInterval(timer);
   }, []);
 
@@ -609,6 +609,7 @@ function NextRoundCountdown({ bracketGames }: { bracketGames: BracketGame[] }) {
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
   // Group games by date for display
   const gamesByDate: Record<string, BracketGame[]> = {};
@@ -664,6 +665,13 @@ function NextRoundCountdown({ bracketGames }: { bracketGames: BracketGame[] }) {
               {String(minutes).padStart(2, "0")}
             </span>
             <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">Min</span>
+          </div>
+          <span className="text-2xl text-gray-600 font-light">:</span>
+          <div className="flex flex-col items-center">
+            <span className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums drop-shadow-[0_0_15px_rgba(74,144,226,0.3)]">
+              {String(seconds).padStart(2, "0")}
+            </span>
+            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">Sec</span>
           </div>
         </div>
 
