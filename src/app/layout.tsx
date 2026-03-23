@@ -44,14 +44,6 @@ export const metadata: Metadata = {
     siteName: "March Madness Tracker",
     type: "website",
     locale: "en_US",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "March Madness 2026 - NCAA Tournament Schedule & Scores",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -59,7 +51,6 @@ export const metadata: Metadata = {
     description:
       "Auto-updating NCAA tournament schedule. Scores, TV channels, streaming platforms, full bracket. Updated every 30 seconds.",
     creator: "@zachlloydai",
-    images: ["/og-image.png"],
   },
   robots: {
     index: true,
