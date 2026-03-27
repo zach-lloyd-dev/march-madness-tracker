@@ -116,7 +116,7 @@ function parseRoundAndRegion(notes: { headline: string }[]): {
   if (headline.includes("1st Round")) round = "1st Round";
   else if (headline.includes("2nd Round")) round = "2nd Round";
   else if (headline.includes("Sweet 16") || headline.includes("Regional Semifinal")) round = "Sweet 16";
-  else if (headline.includes("Elite Eight") || headline.includes("Regional Final")) round = "Elite Eight";
+  else if (headline.includes("Elite Eight") || headline.includes("Elite 8") || headline.includes("Regional Final")) round = "Elite Eight";
   else if (headline.includes("Final Four") || headline.includes("National Semifinal")) round = "Final Four";
   else if (headline.includes("Championship") || headline.includes("National Final"))
     round = "Championship";
